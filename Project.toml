@@ -1,6 +1,9 @@
 [deps]
+DSP = "717857b8-e6f2-59f4-9121-6e50c889abd2"
+Deconvolution = "41ba435c-a500-5816-a783-a9707c6f5f3a"
 FFTW = "7a1cc6ca-52ef-59f5-83cd-3a7055c09341"
 IJulia = "7073ff75-c697-5162-941a-fcdaad2a7d2a"
+LombScargle = "fc60dff9-86e7-5f2f-a8a0-edeadbb75bd9"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 
 [compat]
