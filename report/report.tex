@@ -1,0 +1,55 @@
+% !TEX encoding = UTF-8
+\documentclass{hitgsrep}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{physics}
+\usepackage{tikz}
+%\usepackage[outputdir={out}]{minted}
+
+\usetikzlibrary{arrows,chains}
+
+\hitgsrepset{
+    author={卢}, % 学生姓名
+    studentid={19SXXXXXX}, % 学号
+    studentcat={硕士}, % 学生类别
+    course={数字信号处理}, % 考核科目
+    affiliation={仪器科学与工程学院}, % 学生所在院（系）
+    discipline={仪器科学与技术}, % 学生所在学科
+    year={2020}, % 年份（不填根据当前时间自动生成，一月时需要手动填入前一年的年份）
+    semester={秋}, % 学期（不填根据当前时间自动生成）
+}
+
+\ctexset{
+    section/format=\Large\bfseries
+}
+
+\newcommand{\subjectname}[1]{\begin{center}\LARGE\bfseries #1\end{center}}
+
+\begin{document}
+\maketitle
+
+\subjectname{基于维纳反卷积对运动模糊图像复原}
+
+\section{运动模糊图像的退化模型}
+
+图像复原问题的关键在于退化模型的建立。
+一般的，典型的图像退化模型如图~\ref{fig:model}
+
+\begin{figure}[htb!]
+    \centering
+    \begin{tikzpicture}[
+        font=\footnotesize,
+        every node/.style={draw, text centered},
+        every join/.style={->, draw},
+    ]
+    \tikzset{
+        proc/.style={rectangle},
+        sum/.style={circle},
+    }
+    \node[proc] {输入$f(x,y)$}; 
+    \end{tikzpicture}
+    \caption{图像退化模型}
+    \label{fig:model}
+\end{figure}
+
+\end{document}
