@@ -3,8 +3,10 @@
 \usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage{physics}
+\usepackage[labelformat=simple]{subcaption}
 \usepackage{tikz}
 %\usepackage[outputdir={out}]{minted}
+\usepackage[backend=biber,bibstyle=gb7714-2015,citestyle=gb7714-2015]{biblatex}
 
 \usetikzlibrary{arrows,chains,positioning}
 
@@ -23,6 +25,9 @@
     section/format=\Large\bfseries
 }
 
+\addbibresource[location=local]{wiener.bib}
+
+\renewcommand\thesubfigure{(\alph{subfigure})} % 得到“图 1(a)”形式的引用
 \newcommand{\subjectname}[1]{\begin{center}\LARGE\bfseries #1\end{center}}
 
 \begin{document}
@@ -77,7 +82,7 @@
     h(x,y)=\int_0^{\Delta t}\delta[x-x_0(t),y-y_0(y)]\dd{t}
 \end{equation}
 
-若运动为匀速直线运动，那么式~\eqref{eq:motion-psf-raw} 可以写成
+若运动为匀速直线运动，那么式~\eqref{eq:motion-psf-raw} 可以写成\cite{_radon_2011}
 
 \begin{equation}\label{eq:motion:psf}
     h(x,y)=\begin{cases}
@@ -98,12 +103,64 @@ $L$ 指运动方向上像素移动的距离，称为运动模糊尺度。
 \end{equation}
 其中，$E[\,\cdot\,]$ 是参数的期望值。
 
-据此得到目标函数在频域的最佳估计为
+据此得到目标函数在频域的最佳估计为\cite{masters_digital_2009}
 
 \begin{equation}\label{eq:wiener}
     \hat{F}(u,v)=\qty[\frac{1}{H(u,v)}\frac{|H(u,v)|^2}{|H(u,v)|^2+S_n(u,v)/S_f(u,v)}]
 \end{equation}
-其中，$\hat{F}(u,v)$为图像$f(x,y)$在频域的估计，
+其中，$\hat{F}(u,v)$为图像$f(x,y)$在频域的估计，$H(u,v)$为退化过程的传递函数，$G(u,v)$为退化图像$g(x,y)$的频谱，
+$S_n(u,v)$为噪声功率谱，$S_f(u,v)$为未退化图像的功率谱。
 
+从式~\eqref{eq:wiener} 的形式上可以看到，维纳反卷积比起单纯的逆滤波过程$1/H(u,v)$主要增加了为了处理噪声引入的一个修正项。
+若退化过程不包含噪声，那么维纳滤波和逆滤波是一致的。
+但由于噪声的存在，逆滤波得到的估计为
+
+\begin{equation}
+    \hat{F}(u,v)=F(u,v)+\frac{N(u,v)}{H(u,v)}
+\end{equation}
+其中，$N(u,v)$为噪声频谱。
+
+若退化过程传函$H(u,v)$中包含$0$或接近$0$的部分，那么噪声的作用可能会被极度放大
+
+\section{仿真实验结果与分析}
+
+\begin{figure}[htbp!]
+    \centering
+    \subcaptionbox{原图像\label{fig:origin}}{\includegraphics[width=0.32\linewidth]{origin.png}}\hfill
+    \subcaptionbox{无噪声的运动模糊图像\label{fig:blurred}}{\includegraphics[width=0.32\linewidth]{blurred.png}}\hfill
+    \subcaptionbox{图~\ref{fig:blurredn} 逆滤波的结果\label{fig:inverse}}{\includegraphics[width=0.32\linewidth]{inverse.png}}\\
+    \subcaptionbox{加入$\sigma=0.04$的白噪声的运动模糊图像\label{fig:blurredn}}{\includegraphics[width=0.32\linewidth]{blurredn.png}}\hfill
+    \subcaptionbox{图~\ref{fig:blurredn} 维纳滤波的结果\label{fig:recovered}}{\includegraphics[width=0.32\linewidth]{recovered.png}}\hfill
+    \subcaptionbox{对图~\ref{fig:blurredn} 使用$\sigma=0.04$的噪声估计得到维纳滤波的结果\label{fig:recovered4}}{\includegraphics[width=0.32\linewidth]{recovered4.png}}\\
+    \subcaptionbox{加入$\sigma=0.1$的白噪声的运动模糊图像\label{fig:blurredn2}}{\includegraphics[width=0.32\linewidth]{blurredn2.png}}\hfill
+    \subcaptionbox{图~\ref{fig:blurredn2} 维纳滤波的结果\label{fig:recovered2}}{\includegraphics[width=0.32\linewidth]{recovered2.png}}\hfill
+    \subcaptionbox{对图~\ref{fig:blurredn2} 使用$\sigma=0.1$的噪声估计得到维纳滤波的结果\label{fig:recovered3}}{\includegraphics[width=0.32\linewidth]{recovered3.png}}
+    \caption{仿真实验结果}
+    \label{fig:results}
+\end{figure}
+
+仿真实验结果如图~\ref{fig:results} 所示。
+图~\ref{fig:origin} 为原图像，图~\ref{fig:blurred} 为未加入噪声的模糊图像。
+图~\ref{fig:blurredn} 为加入$\sigma=0.04$的白噪声的运动模糊图像，
+对该图像进行直接逆滤波的结果为图~\ref{fig:inverse}，其原有的形态已经完全被噪声掩盖，无法分辨；
+而对图~\ref{fig:blurredn} 进行维纳滤波的结果为图~\ref{fig:recovered}，
+虽然边缘存在一定的振铃效应，但原图像中的成分基本清晰可辨，背景中靠中间的建筑物的柱子也完全能分辨清楚；
+图~\ref{fig:blurredn2} 为加入$\sigma=0.1$的白噪声的运动模糊图像，
+相比图~\ref{fig:blurredn} ，其在视觉上呈现了明显的噪点，内容更难辨认。
+对其进行维纳滤波的结果为图~\ref{fig:recovered2}，
+其后方建筑物的支柱已较难分辨，但从与原图间的均方误差的角度看，并没有同图~\ref{fig:recovered} 之间存在明显的差距。
+
+图~\ref{fig:recovered3} 给出了一种噪声估计与实际噪声不匹配的情况，
+这时维纳滤波的效果出现了明显的下降，图像的内容变得难以分辨。
+相比之下，图~\ref{fig:recovered4} 虽然也出现了噪声估计与实际噪声的不匹配，
+但由于这种估计在噪声模型上和实际保持一致的同时，也提供了一个更紧的约束，因此恢复结果依然很好。
+
+\section{结论}
+
+维纳滤波能在存在噪声的情况下对运动模糊图像进行有效的复原，相比直接逆滤波的的方法存在极大优势，但需要较为准确的噪声以及估计。
+同时，在实际运用中，运动模糊的参数也不一定能先验地知道，需要进行估计。
+一种行之有效地方案是利用频谱的能量集中特征，利用拉东变换或者霍夫变换对运动模糊的参数进行估计\cite{_radon_2011}。
+
+\printbibliography[heading=bibliography,title=参考文献]
 
 \end{document}
