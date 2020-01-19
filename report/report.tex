@@ -6,7 +6,7 @@
 \usepackage{tikz}
 %\usepackage[outputdir={out}]{minted}
 
-\usetikzlibrary{arrows,chains}
+\usetikzlibrary{arrows,chains,positioning}
 
 \hitgsrepset{
     author={卢}, % 学生姓名
@@ -28,28 +28,82 @@
 \begin{document}
 \maketitle
 
-\subjectname{基于维纳反卷积对运动模糊图像复原}
+\subjectname{基于维纳滤波对运动模糊图像复原}
 
 \section{运动模糊图像的退化模型}
 
 图像复原问题的关键在于退化模型的建立。
-一般的，典型的图像退化模型如图~\ref{fig:model}
+图~\ref{fig:model} 给出了典型的图像退化模型。
+如果退化过程是线性空不变的，那么退化过程可以表示为
+
+\begin{equation}\label{eq:model}
+    g(x,y)=f(x,y)*h(x,y)+n(x,y)
+\end{equation}
 
 \begin{figure}[htb!]
     \centering
     \begin{tikzpicture}[
-        font=\footnotesize,
+        font=\small,
         every node/.style={draw, text centered},
         every join/.style={->, draw},
+        start chain=going right,
     ]
-    \tikzset{
-        proc/.style={rectangle},
-        sum/.style={circle},
-    }
-    \node[proc] {输入$f(x,y)$}; 
+    \node[on chain] {输入$f(x,y)$}; 
+    \node[on chain, join] {$h(x,y)$};
+    \node[circle, on chain, join] (sum) {$\sum$};
+    \node[on chain, join] {输出$g(x,y)$};
+    \node[above=of sum] (noise) {噪声$n(x,y)$};
+    \draw[->] (noise) -- (sum);
     \end{tikzpicture}
     \caption{图像退化模型}
     \label{fig:model}
 \end{figure}
+
+假设物体 $f(x,y)$ 进行平面运动，$x_0(t)$  和 $y_0(t)$ 分别是在 $x$ 和 $y$ 方向上随时间变化的运动参数，
+相机曝光时间为 $\Delta t$，存在加性的高斯白噪声 $n(x,y,t)$。运动模糊得到的像 $g(x,y)$ 满足
+
+\begin{equation}\label{eq:motion}
+    \begin{aligned}
+        g(x,y)&=\int_0^{\Delta t}\qty{f[x-x_0(t),y-y_0(y)]+n[x-x_0(t),y-y_0(y),t]}\dd{t}\\
+        &=\int_0^{\Delta t}f(x,y)*\delta[x-x_0(t),y-y_0(y)]\dd{t}+\int_0^{\Delta t}n[x-x_0(t),y-y_0(y),t]\dd{t}\\
+        &=f(x,y)*\int_0^{\Delta t}\delta[x-x_0(t),y-y_0(y)]\dd{t}+\bar{n}(x,y)
+    \end{aligned}
+\end{equation}
+式中的 $\bar{n}(x,y)$ 为噪声 $n(x,y,t)$ 在运动过程中随时间变化得到的平均值。
+
+对比式~\eqref{eq:model} 和式~\eqref{eq:motion} 可以得到运动模糊过程的点扩散函数
+
+\begin{equation}\label{eq:motion-psf-raw}
+    h(x,y)=\int_0^{\Delta t}\delta[x-x_0(t),y-y_0(y)]\dd{t}
+\end{equation}
+
+若运动为匀速直线运动，那么式~\eqref{eq:motion-psf-raw} 可以写成
+
+\begin{equation}\label{eq:motion:psf}
+    h(x,y)=\begin{cases}
+        \frac{1}{L} & 0\le x\le L\cos\theta, 0\le y\le x\tan\theta\\
+        0 & \text{其它}
+    \end{cases}
+\end{equation}
+其中，$\theta$ 指运动方向与水平方向间的夹角，称为运动模糊方向；
+$L$ 指运动方向上像素移动的距离，称为运动模糊尺度。
+
+\section{运动模糊图像的复原}
+
+对于有加性噪声的图像退化模型（图~\ref{fig:model}），常使用维纳反卷积滤波的方法对图像进行复原。
+维纳滤波器是一种基于最小均方误差准则的最优估计器，其评价函数为
+
+\begin{equation}
+    e^2=E[(\hat{f}-f)^2]
+\end{equation}
+其中，$E[\,\cdot\,]$ 是参数的期望值。
+
+据此得到目标函数在频域的最佳估计为
+
+\begin{equation}\label{eq:wiener}
+    \hat{F}(u,v)=\qty[\frac{1}{H(u,v)}\frac{|H(u,v)|^2}{|H(u,v)|^2+S_n(u,v)/S_f(u,v)}]
+\end{equation}
+其中，$\hat{F}(u,v)$为图像$f(x,y)$在频域的估计，
+
 
 \end{document}
